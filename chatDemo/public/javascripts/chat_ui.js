@@ -37,15 +37,18 @@ $(document).ready(function(){
             message = result.message;
         }
         $('#messages').append(divSystemContentElement(message));
+        $('#messages').scrollTop($('#messages').prop('scrollHeight'));
     });
 
     socket.on('joinResult',function(result){
         if(result.resCode === 300){
             $('#messages').append(divSystemContentElement(result.msg));
+            $('#messages').scrollTop($('#messages').prop('scrollHeight'));
             return;
         }
         $('#room').text(result.room);
         $('#messages').append(divSystemContentElement('Room changed.'));
+        $('#messages').scrollTop($('#messages').prop('scrollHeight'));
         var elements$ = $('#room-list').find('.croom');
         var arr = [];
         elements$.each(function(i){
@@ -61,8 +64,21 @@ $(document).ready(function(){
     socket.on('message',function(message){
         var newElement = $('<div></div>').text(message.text);
         $('#messages').append(newElement);
+        $('#messages').scrollTop($('#messages').prop('scrollHeight'));
     });
-
+    socket.on('userGroup',function(message){
+        $('#userGroup').empty();
+        console.log(message.group)
+        var group = message.group;
+        var i = 0;
+        while(i <= group.length-1){
+            if(group[i] != null){
+                var newElement = $('<div></div>').text(group[i]);
+                $('#userGroup').append(newElement);
+            }
+            i++;
+        }
+    });
     $('#send-message').focus();
 
     $('#send-form').submit(function(){

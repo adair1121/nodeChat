@@ -15,7 +15,7 @@ a{
     margin-bottom:1px;
 }
 #messages{
-    width:690px;
+    width:600px;
     height:300px;
     overflow: auto;
     background-color: #eee;
@@ -27,7 +27,14 @@ a{
     width:100px;
     height:300px;
     overflow: auto;
-    background-color: #999;
+    background-color: #e4e4e4;
+}
+#userGroup{
+    float: left;
+    width: 100px;
+    height: 300px;
+    overflow: hidden;
+    background-color: #e4e4e4;
 }
 .croom{
     padding-top:5px;

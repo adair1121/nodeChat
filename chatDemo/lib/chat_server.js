@@ -55,26 +55,31 @@ function joinRoom(socket,room){
        text:nickNames[socket.id] + ' has joined ' +room +'.'
     });
 
+    getUserGroup(socket,room);
+
+}
+/**
+ * 获取房间里的用户组
+ */
+function getUserGroup(socket,room){
     //确定有哪些用户在房间里
     var usersInRoom = io.sockets.clients(room);
-
-    if(usersInRoom.length > 1){
+    var arr = [];
+    if(usersInRoom.length > 0){
         //如果不止一个用户在这个房间里,汇总一下都有谁
-        var usersInRoomSummary = 'Users currently in '+room +':';
         for(var index in usersInRoom){
             var userSocketId = usersInRoom[index].id;
-            if(userSocketId != socket.id){
-                if(index > 0){
-                    usersInRoomSummary += ', ';
-                }
-                usersInRoomSummary += nickNames[userSocketId];
-            }
+            arr.push(nickNames[userSocketId])
         }
-        usersInRoomSummary+='.';
-
-        //将房间里其他用户的汇总发送给这个用户
-        socket.emit('message',{text:usersInRoomSummary});
+        
+    }else{
+        arr.push(nickNames[socket.id])
     }
+    //将房间里其他用户的汇总发送给这个用户
+    socket.emit('userGroup',{group:arr});
+    socket.broadcast.to(room).emit('userGroup',{
+        group:arr
+    });
 }
 /**
  * 处理昵称变更请求
@@ -105,6 +110,8 @@ function handleNameChangeAttempts(socket,nickNames,namesUsed){
                 socket.broadcast.to(currentRoom[socket.id]).emit('message',{
                     text:previousName + 'is now known as '+ name + '.'
                 })
+
+                getUserGroup(socket,currentRoom[socket.id])
             }else{
                 //昵称已经被占用
                 socket.emit('nameResult',{
@@ -133,6 +140,11 @@ function handleMessageBroadcasting(socket,nickNames){
 function handleRoomJoining(socket){
     socket.on('join',function(room){
         socket.leave(currentRoom[socket.id]);
+        //让房间里的其他用户知道有新用户进入了房间
+        socket.broadcast.to(room).emit('message',{
+            text:nickNames[socket.id] + ' has leave ' +room +'.'
+        });
+        getUserGroup(socket,currentRoom[socket.id]);
         joinRoom(socket,room.newRoom);
     })
 }
@@ -144,6 +156,7 @@ function handleClientDisconnection(socket){
         var nameIndex = namesUsed.indexOf(nickNames[socket.id]);
         delete namesUsed[nameIndex];
         delete nickNames[socket.id];
+        getUserGroup(socket,currentRoom[socket.id]);
     })
 }
 /**

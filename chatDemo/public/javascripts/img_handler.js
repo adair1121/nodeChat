@@ -29,5 +29,5 @@ function initialize(){
     
 }
 $(document).ready(function(){
-    EnjoyHandler.getInstance().initialize();
+    // EnjoyHandler.getInstance().initialize();
 });
